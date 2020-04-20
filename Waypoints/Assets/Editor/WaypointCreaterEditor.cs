@@ -12,7 +12,7 @@ public class WaypointCreaterEditor : Editor
     private SerializedProperty m_PropPointRadius;
     private SerializedProperty m_PropColor;
     private SerializedProperty m_PropWaypoints;
-    private SerializedProperty m_PropCheckBox;
+    private SerializedProperty m_PropCheckBoxs;
     private SerializedProperty m_PropGroundLevel;
 
     private Tool m_LastTool = Tool.None;
@@ -31,7 +31,7 @@ public class WaypointCreaterEditor : Editor
         m_PropPointRadius = m_SerializedObject.FindProperty("WaypointRadius");
         m_PropColor = m_SerializedObject.FindProperty("PointColor");
         m_PropWaypoints = m_SerializedObject.FindProperty("Waypoints");
-        m_PropCheckBox = m_SerializedObject.FindProperty("CheckBox");
+        m_PropCheckBoxs = m_SerializedObject.FindProperty("WaypointsCheckBox");
         m_PropGroundLevel = m_SerializedObject.FindProperty("MinGroundLevel");
 
         Selection.selectionChanged += Repaint;
@@ -90,9 +90,10 @@ public class WaypointCreaterEditor : Editor
             GUILayout.Space(10);
             if (GUILayout.Button("Remove Waypoint"))
             {
-                // REDO
-
-                m_WaypointCreater.RemoveWaypointFromList(0);
+                if (m_PropWaypoints.arraySize > 0)
+                {
+                    m_WaypointCreater.RemoveWaypointFromList();
+                }
             }
 
             if (m_SerializedObject.ApplyModifiedProperties())
@@ -113,7 +114,7 @@ public class WaypointCreaterEditor : Editor
         {
             using (new GUILayout.HorizontalScope())
             {
-                
+                EditorGUILayout.PropertyField(m_PropCheckBoxs.GetArrayElementAtIndex(index), new GUIContent(""), GUILayout.Width(20));
                 GUILayout.Label("Point " + index.ToString(), GUILayout.Width(60));
                 EditorGUILayout.PropertyField(m_PropWaypoints.GetArrayElementAtIndex(index), new GUIContent(""));
             }

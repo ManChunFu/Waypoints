@@ -8,7 +8,7 @@ public class WaypointCreater : MonoBehaviour
     public float WaypointRadius = 0.1f;
     public Color PointColor = Color.red;
     public List<Vector3> Waypoints = new List<Vector3>();
-    public List<bool> CheckBox = new List<bool>();
+    public List<bool> WaypointsCheckBox = new List<bool>();
     public float MinGroundLevel = 1.0f;
 
     public int GetNextIndex(int index)
@@ -24,11 +24,20 @@ public class WaypointCreater : MonoBehaviour
     public void CreateWaypoint()
     {
         Waypoints.Add(Vector3.zero);
+        WaypointsCheckBox.Add(false);
     }
 
-    public void RemoveWaypointFromList(int index)
+    public void RemoveWaypointFromList()
     {
-        Waypoints.RemoveAt(index);
+        for (int index = 0; index < WaypointsCheckBox.Count; index++)
+        {
+            if (WaypointsCheckBox[index])
+            {
+                Waypoints.RemoveAt(index);
+                WaypointsCheckBox.RemoveAt(index);
+                index--;
+            }
+        }
     }
 
     public void SetGroundLevel(float minGroundLevel)
