@@ -10,6 +10,7 @@ public class AIController : MonoBehaviour
 
     private int m_CurrentWaypointIndex = 0;
     private float m_TimeSinceArrivedAtWaypoint = Mathf.Infinity;
+    private const float m_MinGroundLevel = 1.0f;
 
     private void Start()
     {
@@ -26,7 +27,6 @@ public class AIController : MonoBehaviour
                 throw new MissingReferenceException("Missing reference of WaypointCreater script.");
             }
         }
-
     }
 
     private void Update()
@@ -44,18 +44,24 @@ public class AIController : MonoBehaviour
                 m_TimeSinceArrivedAtWaypoint = 0;
                 CycleWaypoint();
             }
+
             m_TimeSinceArrivedAtWaypoint += Time.deltaTime;
+
             if (m_TimeSinceArrivedAtWaypoint > m_WaypointDwellTime)
             {
-                transform.LookAt(m_Waypoint.Waypoints[m_CurrentWaypointIndex]);
-                transform.position = Vector3.MoveTowards(transform.position, m_Waypoint.Waypoints[m_CurrentWaypointIndex], m_Speed * Time.deltaTime);
+                transform.LookAt(GetCurrentWaypoint());
+                transform.position = Vector3.MoveTowards(transform.position, GetCurrentWaypoint(), m_Speed * Time.deltaTime);
             }
         }
     }
 
+    private Vector3 GetCurrentWaypoint()
+    {
+        return m_Waypoint.Waypoints[m_CurrentWaypointIndex];
+    }
     private bool AtWaypoint()
     {
-        return transform.position == m_Waypoint.Waypoints[m_CurrentWaypointIndex];
+        return transform.position == GetCurrentWaypoint();
     }
 
     private void CycleWaypoint()

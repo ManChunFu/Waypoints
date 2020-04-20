@@ -13,15 +13,23 @@ public class WaypointCreaterEditor : Editor
     private SerializedProperty m_PropPointRadius;
     private SerializedProperty m_PropColor;
     private SerializedProperty m_PropWaypoints;
+    private SerializedProperty m_PropGroundLevel;
+
+    private Tool m_LastTool = Tool.None;
+    private const float m_ScreenSize = 10f;
 
     private void OnEnable()
     {
+        m_LastTool = Tools.current;
+        Tools.current = Tool.None;
+
         m_WaypointCreater = FindObjectOfType<WaypointCreater>();
 
         m_SerializedObject = serializedObject;
         m_PropPointRadius = m_SerializedObject.FindProperty("WaypointRadius");
         m_PropColor = m_SerializedObject.FindProperty("PointColor");
         m_PropWaypoints = m_SerializedObject.FindProperty("Waypoints");
+        m_PropGroundLevel = m_SerializedObject.FindProperty("MinGroundLevel");
 
         Selection.selectionChanged += Repaint;
         SceneView.duringSceneGui += DuringSceneGUI;
@@ -29,6 +37,8 @@ public class WaypointCreaterEditor : Editor
 
     private void OnDisable()
     {
+        Tools.current = m_LastTool;
+
         Selection.selectionChanged -= Repaint;
         SceneView.duringSceneGui -= DuringSceneGUI;
     }
@@ -51,10 +61,16 @@ public class WaypointCreaterEditor : Editor
         GUILayout.Space(10);
         using (new GUILayout.VerticalScope(EditorStyles.helpBox))
         {
+            GUILayout.Space(10);
+            GUILayout.Toggle(false, new GUIContent("Set Ground Level height"));//, GUILayout.Width(100));
+            GUILayout.Space(10);
+
             if (m_PropWaypoints.arraySize > 0)
             {
-                ReadWaypointList();
+               ReadWaypointList();
             }
+
+            GUILayout.Space(10);
         }
 
         GUILayout.Space(10);
@@ -73,12 +89,13 @@ public class WaypointCreaterEditor : Editor
 
     private void ReadWaypointList()
     {
-        if (m_PropWaypoints.arraySize > 0)
+        for (int index = 0; index < m_PropWaypoints.arraySize; index++)
         {
-            for (int index = 0; index < m_PropWaypoints.arraySize; index++)
+            using (new GUILayout.HorizontalScope())
             {
-                //GUILayout.Toggle(false, null, );
-                EditorGUILayout.Vector3Field("Point" + index.ToString(), m_PropWaypoints.GetArrayElementAtIndex(index).vector3Value);
+                GUILayout.Toggle(false, (string)null, GUILayout.Width(30));
+                GUILayout.Label("Point " + index.ToString(), GUILayout.Width(60));
+                EditorGUILayout.PropertyField(m_PropWaypoints.GetArrayElementAtIndex(index), new GUIContent(""));
             }
         }
     }
@@ -86,13 +103,15 @@ public class WaypointCreaterEditor : Editor
     private void DuringSceneGUI(SceneView sceneView)
     {
         m_SerializedObject.Update();
-        for (int i = 0; i < m_WaypointCreater.Waypoints.Count; i++)
+        for (int i = 0; i < m_PropWaypoints.arraySize; i++)
         {
-            m_WaypointCreater.Waypoints[i] = Handles.PositionHandle(m_WaypointCreater.Waypoints[i], Quaternion.identity);
+            SerializedProperty prop = m_PropWaypoints.GetArrayElementAtIndex(i);
+            prop.vector3Value = Handles.PositionHandle(prop.vector3Value, Quaternion.identity);
             Handles.color = m_PropColor.colorValue;
-            Handles.SphereHandleCap(-1, m_WaypointCreater.Waypoints[i], Quaternion.identity, m_PropPointRadius.floatValue, EventType.Repaint);
+            Handles.SphereHandleCap(-1, prop.vector3Value, Quaternion.identity, m_PropPointRadius.floatValue, EventType.Repaint);
+            Handles.Label(prop.vector3Value, "Point " + i.ToString());
+            Handles.DrawDottedLine(prop.vector3Value, m_PropWaypoints.GetArrayElementAtIndex(m_WaypointCreater.GetNextIndex(i)).vector3Value, m_ScreenSize);
         }
         m_SerializedObject.ApplyModifiedProperties();
-
     }
 }
