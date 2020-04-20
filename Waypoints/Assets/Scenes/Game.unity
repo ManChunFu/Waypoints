@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 706903}
   - component: {fileID: 706902}
   - component: {fileID: 706901}
+  - component: {fileID: 706904}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -204,6 +205,34 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &706904
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64729c84c32270c4ba2808251338acd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _target: {fileID: 329419054}
+  _attitude: 0.7
+  _viewAngle: 8
+  _distanceToTarget: 4.2
+  _smoothSpeed: 3.5
+  _mouseSensitivity: 45
+  _minVerticalAngle: -10
+  _maxVerticalAngle: 40
+  _zoomSpeed: 90
+  _maxZoom: 15
+  _minZoom: 2
+  _collisionMask:
+    serializedVersion: 2
+    m_Bits: 0
+  _zoomIn: 1.8
+  _smoothZoomToTarget: 6
 --- !u!1 &329419048
 GameObject:
   m_ObjectHideFlags: 0
@@ -1313,13 +1342,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 466006970581dfb41ba2bade4cc8ba78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WaypointRadius: 0.31
+  WaypointRadius: 0.456
   PointColor: {r: 1, g: 0.56846285, b: 0, a: 1}
   Waypoints:
-  - {x: -11.293654, y: 1, z: -13.578032}
-  - {x: -0.583027, y: 1, z: -13.854212}
-  - {x: 0.679893, y: 1, z: 0}
-  - {x: -15.811087, y: 1, z: 0}
+  - {x: -7.9625115, y: 1, z: -4.0020237}
+  - {x: 3.2427137, y: 1, z: 0}
+  - {x: 6.0171785, y: 1, z: -10.745155}
+  - {x: -8.746798, y: 1, z: -19.288147}
   MinGroundLevel: 1
 --- !u!4 &1902150686
 Transform:
