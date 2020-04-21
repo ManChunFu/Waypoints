@@ -668,7 +668,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1051192283}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.8221893, y: 3.4044547, z: 0.54301834}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1324119034}
@@ -1344,12 +1344,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WaypointRadius: 0.456
   PointColor: {r: 1, g: 0.56846285, b: 0, a: 1}
-  Waypoints:
-  - {x: -11.588037, y: 1, z: -13.770332}
-  - {x: 0, y: 1, z: -13.466202}
-  - {x: -0.14477491, y: 1, z: -3.6455116}
-  - {x: -14.081154, y: 1, z: -2.9304276}
-  WaypointsCheckBox: 00000000
+  Waypoints: []
+  WaypointsCheckBox: 
   MinGroundLevel: 1
 --- !u!4 &1902150686
 Transform:
