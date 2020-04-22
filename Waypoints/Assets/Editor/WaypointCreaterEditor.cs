@@ -1,4 +1,6 @@
-﻿using UnityEditor;
+﻿using System;
+using System.Runtime;
+using UnityEditor;
 using UnityEngine;
 
 [CanEditMultipleObjects]
@@ -13,14 +15,15 @@ public class WaypointCreaterEditor : Editor
     private SerializedProperty m_PropWaypoints;
     private SerializedProperty m_PropCheckBoxs;
     private SerializedProperty m_PropGroundLevel;
+    private SerializedProperty m_PropIsSetGround;
+    private SerializedProperty m_PropInsertPoint;
 
     private Tool m_LastTool = Tool.None;
     private const float m_ScreenSize = 10f;
-    private bool m_SetGroundLevel = false;
+    private bool m_ShowMessage = false;
 
     private void OnEnable()
     {
-        //m_WaypointCreater.RemoveAll();
         m_LastTool = Tools.current;
         Tools.current = Tool.None;
 
@@ -32,6 +35,8 @@ public class WaypointCreaterEditor : Editor
         m_PropWaypoints = m_SerializedObject.FindProperty("Waypoints");
         m_PropCheckBoxs = m_SerializedObject.FindProperty("WaypointsCheckBox");
         m_PropGroundLevel = m_SerializedObject.FindProperty("MinGroundLevel");
+        m_PropIsSetGround = m_SerializedObject.FindProperty("IsSetGroundLevel");
+        m_PropInsertPoint = m_SerializedObject.FindProperty("IsInsertPoint");
 
         Selection.selectionChanged += Repaint;
         SceneView.duringSceneGui += DuringSceneGUI;
@@ -48,47 +53,53 @@ public class WaypointCreaterEditor : Editor
     public override void OnInspectorGUI()
     {
         m_SerializedObject.Update();
+
         GUILayout.Space(10);
         EditorGUILayout.PropertyField(m_PropPointRadius);
 
         GUILayout.Space(10);
         EditorGUILayout.PropertyField(m_PropColor);
-        GUILayout.Space(20);
 
+        GUILayout.Space(20);
+        var style = EditorStyles.wordWrappedLabel;
+        style.fontStyle = FontStyle.Bold;
+        EditorGUILayout.LabelField("Add waypoint by click the button under or Shit + mouse click at the scene.", style);
+
+        GUILayout.Space(5);
         if (GUILayout.Button("Add Waypoint"))
         {
             m_WaypointCreater.CreateWaypoint();
         }
 
         GUILayout.Space(10);
-
-        if (m_PropWaypoints.arraySize > 0)
+        if (m_PropWaypoints.arraySize > 0 && m_PropCheckBoxs.arraySize > 0)
         {
             using (new GUILayout.VerticalScope(EditorStyles.helpBox))
             {
                 GUILayout.Space(10);
-                m_SetGroundLevel = EditorGUILayout.Toggle("Set ground level height", m_SetGroundLevel);
+                SetGroundHeight();
 
-                if (m_SetGroundLevel)
-                { 
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        EditorGUILayout.PropertyField(m_PropGroundLevel, GUILayout.Width(250));
-                        GUILayout.Space(10);
-                        if (GUILayout.Button("Apply"))
-                        {
-                            SetGroundLevel();
-                        }
-                    }
-                }
                 GUILayout.Space(10);
                 ReadWaypointList();
+
+                GUILayout.Space(10);
+                EditorGUILayout.LabelField("Insert waypoints at the scene. Check the box under to activate the function.", style);
+                GUILayout.Space(5);
+                m_PropInsertPoint.boolValue = EditorGUILayout.Toggle("Break-Way-Insert", m_PropInsertPoint.boolValue);
+                GUILayout.Space(10);
+                if (m_PropInsertPoint.boolValue)
+                {
+                    EditorGUILayout.HelpBox("Function activated.", MessageType.Info);
+                }
             }
 
-
             GUILayout.Space(10);
-            if (GUILayout.Button("Remove Waypoint"))
+            EditorGUILayout.LabelField("Remove a waypoint by click the button under or Ctrl + mouse click on the point at the scene.", style);
+            GUILayout.Space(5);
+            if (GUILayout.Button("Remove Selected Waypoint"))
             {
+                m_ShowMessage = false;
+
                 if (m_PropCheckBoxs.arraySize > 0)
                 {
                     if (m_WaypointCreater.IsAnySelected())
@@ -97,8 +108,7 @@ public class WaypointCreaterEditor : Editor
                     }
                     else
                     {
-                        GUILayout.Space(10);
-                        EditorGUILayout.HelpBox("There is no selected point to remove", MessageType.Warning);
+                        m_ShowMessage = true;
                     }
                 }
             }
@@ -107,11 +117,39 @@ public class WaypointCreaterEditor : Editor
             if (GUILayout.Button("Remove All"))
             {
                 m_WaypointCreater.RemoveAll();
+                m_PropIsSetGround.boolValue = false;
+                m_PropInsertPoint.boolValue = false;
+                m_ShowMessage = false;
             }
 
-            if (m_SerializedObject.ApplyModifiedProperties())
+            if (m_ShowMessage)
             {
-                SceneView.RepaintAll();
+                GUILayout.Space(10);
+                EditorGUILayout.HelpBox("Select at least one point to remove.", MessageType.Warning);
+            }
+        }
+
+        if (m_SerializedObject.ApplyModifiedProperties())
+        {
+            SceneView.RepaintAll();
+        }
+    }
+
+
+    private void SetGroundHeight()
+    {
+        m_PropIsSetGround.boolValue = EditorGUILayout.Toggle("Set ground height", m_PropIsSetGround.boolValue);
+
+        if (m_PropIsSetGround.boolValue)
+        {
+            using (new GUILayout.HorizontalScope())
+            {
+                EditorGUILayout.PropertyField(m_PropGroundLevel, GUILayout.Width(180));
+                GUILayout.Space(5);
+                if (GUILayout.Button("Apply"))
+                {
+                    SetGroundLevel();
+                }
             }
         }
     }
@@ -138,9 +176,6 @@ public class WaypointCreaterEditor : Editor
     private void DuringSceneGUI(SceneView sceneView)
     {
         Selection.activeObject = m_WaypointCreater;
-
-        m_SerializedObject.Update();
-
         bool holdingShift = (Event.current.modifiers & EventModifiers.Shift) != 0;
         bool holdingCtl = (Event.current.modifiers & EventModifiers.Control) != 0;
 
@@ -149,14 +184,23 @@ public class WaypointCreaterEditor : Editor
         {
             if (Event.current.type == EventType.MouseDown && holdingShift)
             {
-                m_WaypointCreater.CreateWaypoing(hit.point);
+                if (m_PropInsertPoint.boolValue && m_PropWaypoints.arraySize > 2)
+                {
+                    m_WaypointCreater.InsertPoint(hit.point);
+                }
+                else
+                {
+                    m_WaypointCreater.CreateWaypoint(hit.point);
+                }
             }
 
             if (Event.current.type == EventType.MouseDown && holdingCtl)
             {
-               m_WaypointCreater.RemoveWaypoint(hit.point);
+                m_WaypointCreater.RemoveWaypoint(hit.point);
             }
         }
+
+        m_SerializedObject.Update();
 
         if (m_PropWaypoints.arraySize > 0)
         {
@@ -169,13 +213,14 @@ public class WaypointCreaterEditor : Editor
                 Handles.SphereHandleCap(-1, prop.vector3Value, Quaternion.identity, m_PropPointRadius.floatValue, EventType.Repaint);
 
                 Handles.Label(prop.vector3Value, "Point " + i.ToString());
-                
-                Handles.DrawDottedLine(prop.vector3Value, m_PropWaypoints.GetArrayElementAtIndex(m_WaypointCreater.GetNextIndex(i)).vector3Value, m_ScreenSize);
-                
+
+                if (m_PropWaypoints.arraySize > 1)
+                {
+                    Handles.DrawDottedLine(prop.vector3Value, m_PropWaypoints.GetArrayElementAtIndex(m_WaypointCreater.GetNextIndex(i)).vector3Value, m_ScreenSize);
+                }
             }
         }
         m_SerializedObject.ApplyModifiedProperties();
-
     }
 }
 

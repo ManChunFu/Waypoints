@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 public class AIController : MonoBehaviour
@@ -10,7 +9,6 @@ public class AIController : MonoBehaviour
 
     private int m_CurrentWaypointIndex = 0;
     private float m_TimeSinceArrivedAtWaypoint = Mathf.Infinity;
-    private const float m_MinGroundLevel = 1.0f;
 
     private void Start()
     {
@@ -36,7 +34,6 @@ public class AIController : MonoBehaviour
 
     private void PatrolBehavior()
     {
-
         if (m_Waypoint.Waypoints.Any())
         {
             if (AtWaypoint())
