@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime;
 using UnityEditor;
 using UnityEngine;
@@ -68,6 +69,7 @@ public class WaypointCreaterEditor : Editor
         GUILayout.Space(5);
         if (GUILayout.Button("Add Waypoint"))
         {
+            Undo.RegisterCompleteObjectUndo(m_WaypointCreater, "add point");
             m_WaypointCreater.CreateWaypoint();
         }
 
@@ -104,6 +106,7 @@ public class WaypointCreaterEditor : Editor
                 {
                     if (m_WaypointCreater.IsAnySelected())
                     {
+                        Undo.RegisterCompleteObjectUndo(m_WaypointCreater, "selected point");
                         m_WaypointCreater.RemoveWaypoint();
                     }
                     else
@@ -116,6 +119,7 @@ public class WaypointCreaterEditor : Editor
             GUILayout.Space(10);
             if (GUILayout.Button("Remove All"))
             {
+                Undo.RegisterCompleteObjectUndo(m_WaypointCreater, "all the points");
                 m_WaypointCreater.RemoveAll();
                 m_PropIsSetGround.boolValue = false;
                 m_PropInsertPoint.boolValue = false;
@@ -186,16 +190,19 @@ public class WaypointCreaterEditor : Editor
             {
                 if (m_PropInsertPoint.boolValue && m_PropWaypoints.arraySize > 2)
                 {
+                    Undo.RegisterCompleteObjectUndo(m_WaypointCreater, "add point");
                     m_WaypointCreater.InsertPoint(hit.point);
                 }
                 else
                 {
+                    Undo.RegisterCompleteObjectUndo(m_WaypointCreater, "add point");
                     m_WaypointCreater.CreateWaypoint(hit.point);
                 }
             }
 
             if (Event.current.type == EventType.MouseDown && holdingCtl)
             {
+                Undo.RegisterCompleteObjectUndo(m_WaypointCreater, "selected point");
                 m_WaypointCreater.RemoveWaypoint(hit.point);
             }
         }
